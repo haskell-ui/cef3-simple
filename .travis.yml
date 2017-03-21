@@ -1,0 +1,17 @@
+
+language: nix
+script: nix-build default.nix
+
+before_install:
+  - >
+      echo "$TRAVIS_COMMIT_MESSAGE"
+      | grep -E  '\[(skip travis|travis skip)\]' || {
+        echo "[skip travis] has been found, exiting."
+        exit
+      }
+
+      git diff --name-only $TRAVIS_COMMIT_RANGE
+      | grep -qvE '\.md$' || {
+        echo "Only docs were updated, stopping build process."
+        exit
+      }

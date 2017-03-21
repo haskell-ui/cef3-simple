@@ -1,0 +1,32 @@
+
+version: "branch-{branch}-build-nr-{build}"
+skip_tags: true
+environment:
+  global:
+    STACK_ROOT: C:\sr
+
+skip_commits:
+  files:
+    - '**\*.md'
+
+build: off
+
+install:
+  - git submodule update --init --recursive
+  - curl -s -ostack.zip -L --insecure http://www.stackage.org/stack/windows-x86_64
+  - 7z x stack.zip stack.exe > NUL
+  - set PATH=%PATH%;C:\Stack
+  - mkdir C:\Stack
+  - move stack.exe C:\Stack\
+  - .\cef3-raw\scripts\setup.bat
+
+build_script:
+  - stack setup --skip-msys --no-terminal > NUL
+  - cd cef3-raw
+  - .\scripts\configure.bat
+  - cd ..
+  - stack build
+
+cache:
+  - C:\sr -> .appveyor.yml
+
