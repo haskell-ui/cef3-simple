@@ -1,3 +1,4 @@
+{-# Language CPP #-}
 module Graphics.CEF3.Simple
      ( startBrowserUrl
      ) where
