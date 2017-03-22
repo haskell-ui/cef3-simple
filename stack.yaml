@@ -1,0 +1,5 @@
+resolver: lts-8.4
+packages:
+  - '.'
+  - cef3-raw
+

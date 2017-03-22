@@ -13,11 +13,15 @@ build: off
 
 install:
   - git submodule update --init --recursive
+  - set PATH=%PATH%;C:\bin
+  - mkdir C:\bin
+  - appveyor DownloadFile https://winampplugins.co.uk/curl/curl_7_53_1_openssl_nghttp2_x64.7z -FileName curl.7z
+  - 7z x curl.7z > NUL
+  - move curl.exe C:\bin\ > NUL
+  - move ca-bundle.crt C:\bin\ > NUL
   - curl -s -ostack.zip -L --insecure http://www.stackage.org/stack/windows-x86_64
   - 7z x stack.zip stack.exe > NUL
-  - set PATH=%PATH%;C:\Stack
-  - mkdir C:\Stack
-  - move stack.exe C:\Stack\
+  - move stack.exe C:\bin\ > NUL
   - .\cef3-raw\scripts\setup.bat
 
 build_script:
