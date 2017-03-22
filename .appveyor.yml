@@ -1,11 +1,36 @@
 
 version: "branch-{branch}-build-nr-{build}"
 skip_tags: true
+environment:
+  global:
+    STACK_ROOT: C:\sr
+
+skip_commits:
+  files:
+    - '**\*.md'
 
 build: off
 
 install:
-  - echo %PATH%
+  - git submodule update --init --recursive
+  - set PATH=%PATH%;C:\bin
+  - mkdir C:\bin
   - appveyor DownloadFile https://winampplugins.co.uk/curl/curl_7_53_1_openssl_nghttp2_x64.7z -FileName curl.7z
+  - 7z x curl.7z
   - dir
-  - curl --version
+  - move curl.exe C:\bin\
+  - curl -s -ostack.zip -L --insecure http://www.stackage.org/stack/windows-x86_64
+  - 7z x stack.zip stack.exe > NUL
+  - move stack.exe C:\bin\
+  - .\cef3-raw\scripts\setup.bat
+
+build_script:
+  - stack setup --skip-msys --no-terminal > NUL
+  - cd cef3-raw
+  - .\scripts\configure.bat
+  - cd ..
+  - stack build
+
+cache:
+  - C:\sr -> .appveyor.yml
+
