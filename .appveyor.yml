@@ -5,4 +5,7 @@ skip_tags: true
 build: off
 
 install:
+  - echo %PATH%
+  - appveyor DownloadFile https://winampplugins.co.uk/curl/curl_7_53_1_openssl_nghttp2_x64.7z
+  - 7z --version
   - curl --version
