@@ -52,7 +52,7 @@ initMainArgs = do
 startBrowserWindow :: String -> IO ()
 startBrowserWindow url = do
     let windowTitle = "CEF3"
-    windowInfo <- createWindow windowTitle
+    windowInfo <- createWindowInfo windowTitle
 
     client <- initialize_client_handler
     cefUrl <- mkCefStringPtr url
@@ -61,8 +61,8 @@ startBrowserWindow url = do
     void $ c'cef_browser_host_create_browser
         windowInfo client cefUrl browserSettings nullPtr
 
-createWindow :: String -> IO (Ptr C'cef_window_info_t)
-createWindow windowTitle = do
+createWindowInfo :: String -> IO (Ptr C'cef_window_info_t)
+createWindowInfo windowTitle = do
     winName <- mkCefString windowTitle
 #if defined(mingw32_HOST_OS)
     new $ C'cef_window_info_t
