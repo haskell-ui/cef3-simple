@@ -1,6 +1,7 @@
 {-# Language CPP #-}
 module Graphics.CEF3.Simple
      ( startBrowserUrl
+     , handleSubProcess
      ) where
 
 import Control.Monad (unless, void)
@@ -8,13 +9,12 @@ import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal hiding (void)
 import Foreign.Storable
+import System.Environment
 
 #if defined(mingw32_HOST_OS)
 import Graphics.Win32
 import System.Win32.DLL
 import Data.Bits ((.|.))
-#elif defined(linux_HOST_OS)
-import System.Environment
 #endif
 
 import Bindings.CEF3
@@ -24,17 +24,23 @@ startBrowserUrl url = do
     mainArgs <- initMainArgs
 
     app <- initialize_app_handler
-    exCode <- c'cef_execute_process mainArgs app nullPtr
-    unless (exCode >= 0) $ do
+    settings <- mkCefSettings
+    void $ c'cef_initialize mainArgs settings app nullPtr
 
-        settings <- mkCefSettings
-        void $ c'cef_initialize mainArgs settings app nullPtr
+    startBrowserWindow url
 
-        startBrowserWindow url
+    c'cef_run_message_loop
+    c'cef_shutdown
 
-        c'cef_run_message_loop
-        c'cef_shutdown
-
+handleSubProcess :: IO () -> IO ()
+handleSubProcess cont = do
+    haskArgs <- getArgs
+    if any (=="--type=zygote") haskArgs then do
+        debugMsg "Start zygote"
+        mainArgs <- initMainArgs
+        app <- initialize_app_handler
+        void $ c'cef_execute_process mainArgs app nullPtr
+    else cont
 
 initMainArgs :: IO (Ptr C'cef_main_args_t)
 initMainArgs = do
@@ -173,24 +179,24 @@ mkCefSettings = newWithSize
   <$> return 0 -- dummy size, newWithSize will populate
   <*> return 0 -- single process
   <*> return 1 -- no_sandbox
-  <*> mkCefString ""
+  <*> mkCefString "" -- browser subprocess path
   <*> return 0 -- multithreaded message loop
-  <*> return 0 -- command line args disabled
-  <*> mkCefString ""
+  <*> return 1 -- command line args disabled
+  <*> mkCefString "" -- cache path
   <*> return 0 -- persist session cookies
-  <*> mkCefString ""
-  <*> mkCefString ""
-  <*> mkCefString ""-- locale
-  <*> mkCefString ""--log file
+  <*> mkCefString "" -- user agent
+  <*> mkCefString "" -- product version
+  <*> mkCefString "" -- locale
+  <*> mkCefString "" -- log file
   <*> return c'LOGSEVERITY_DEFAULT
   <*> return 0 -- release dcheck enabled
-  <*> mkCefString ""
-  <*> mkCefString ""
-  <*> mkCefString ""-- locales dir path
+  <*> mkCefString "" -- javascript flags
+  <*> mkCefString "" -- resources dir path
+  <*> mkCefString "" -- locales dir path
   <*> return 0 -- pack loading disabled
   <*> return 0 -- remote debugging port
   <*> return 5 -- uncaught exception stack size
-  <*> return 0
+  <*> return 0 -- context safety implementation
   <*> return 0 -- ignore certificate errors
   <*> return 0 -- background color
   )
