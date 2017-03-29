@@ -35,8 +35,8 @@ startBrowserUrl url = do
 handleSubProcess :: IO () -> IO ()
 handleSubProcess cont = do
     haskArgs <- getArgs
-    if any (=="--type=zygote") haskArgs then do
-        debugMsg "Start zygote"
+    if any (isPrefixOf "--type=") haskArgs then do
+        putStrLn $ "Starting subprocess: " ++ unwords haskArgs
         mainArgs <- initMainArgs
         app <- initialize_app_handler
         void $ c'cef_execute_process mainArgs app nullPtr
