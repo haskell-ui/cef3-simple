@@ -5,6 +5,7 @@ module Graphics.CEF3.Simple
      ) where
 
 import Control.Monad (unless, void)
+import Data.List (isPrefixOf)
 import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal hiding (void)
