@@ -1,4 +1,23 @@
 {-# Language CPP #-}
+--------------------------------------------------------------------------------
+-- |
+-- Module     : Graphics.CEF3.Simple
+-- License    : BSD-style (see the file LICENSE)
+-- Copyright  : Maksymilian Owsianny
+-- Maintainer : Maksymilian.Owsianny@gmail.com
+--
+-- This is a WIP package containing helper functions for some commonly used
+-- tasks around cef3-raw.
+--
+-- For example, to create a browser window and start it with google webpage:
+--
+-- @
+-- main :: IO ()
+-- main = handleSubProcess $ do
+--   startBrowserUrl "http://google.com"
+-- @
+--
+--------------------------------------------------------------------------------
 module Graphics.CEF3.Simple
      ( startBrowserUrl
      , handleSubProcess
@@ -20,6 +39,7 @@ import Data.Bits ((.|.))
 
 import Bindings.CEF3
 
+-- | Starts the browser window with specified URL
 startBrowserUrl :: String -> IO ()
 startBrowserUrl url = do
     mainArgs <- initMainArgs
@@ -33,6 +53,7 @@ startBrowserUrl url = do
     c'cef_run_message_loop
     c'cef_shutdown
 
+-- | Handle the cef subprocesses
 handleSubProcess :: IO () -> IO ()
 handleSubProcess cont = do
     haskArgs <- getArgs
